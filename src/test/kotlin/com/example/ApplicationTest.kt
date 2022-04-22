@@ -42,14 +42,15 @@ class ApplicationTest {
 
             pages.forEach { page ->
                 handleRequest(HttpMethod.Get, "/boruto/ninjas?page=$page").apply {
+                    val actual = Json.decodeFromString<ApiResponse>(response.content.toString())
                     val expected = ApiResponse(
                         success = true,
                         message = "OK",
                         prevPage = calculatePage(page)[PREV_PAGE],
                         nextPage = calculatePage(page)[NEXT_PAGE],
-                        ninjas = ninjas[page - 1]
+                        ninjas = ninjas[page - 1],
+                        lastUpdated = actual.lastUpdated
                     )
-                    val actual = Json.decodeFromString<ApiResponse>(response.content.toString())
                     assertEquals(HttpStatusCode.OK, response.status())
                     assertEquals(expected, actual)
                 }

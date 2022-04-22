@@ -22,6 +22,10 @@ repositories {
     mavenCentral()
 }
 
+tasks.create("stage"){
+    dependsOn("installDist")
+}
+
 dependencies {
     implementation("io.ktor:ktor-server-core:$ktorVersion")
     implementation("io.ktor:ktor-server-host-common:$ktorVersion")
