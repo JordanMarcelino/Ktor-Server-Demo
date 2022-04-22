@@ -1,1 +1,1 @@
-web: build/install/com.example.ktor-server-boruto/bin/com.example.ktor-server-boruto
+web: build/install/ktor-server-boruto/bin/ktor-server-boruto
