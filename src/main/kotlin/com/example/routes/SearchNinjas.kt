@@ -8,10 +8,10 @@ import io.ktor.routing.*
 import org.koin.ktor.ext.inject
 
 fun Route.searchNinjas(){
-    val repository : NinjaRepository by inject()
+    val ninjaRepositoryAlt : NinjaRepository by inject()
     get("/search/ninjas"){
         val query = call.request.queryParameters["query"]
-        val ninjas = repository.searchNinjas(query)
+        val ninjas = ninjaRepositoryAlt.searchNinjas(query)
 
         call.respond(
             message = ninjas,
