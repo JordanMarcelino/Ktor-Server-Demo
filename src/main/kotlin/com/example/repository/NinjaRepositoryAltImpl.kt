@@ -3,23 +3,9 @@ package com.example.repository
 import com.example.model.ApiResponse
 import com.example.model.Ninja
 
-const val PREV_PAGE = "prevPage"
-const val NEXT_PAGE = "nextPage"
+class NinjaRepositoryAltImpl : NinjaRepositoryAlt {
 
-class NinjaRepositoryImpl : NinjaRepository {
-
-    override val ninjas: Map<Int, List<Ninja>> by lazy {
-        mapOf(
-            1 to page1,
-            2 to page2,
-            3 to page3,
-            4 to page4,
-            5 to page5
-        )
-    }
-
-    override val page1 by lazy {
-        listOf(
+    override val ninjas: List<Ninja> = listOf(
             Ninja(
                 id = 1,
                 name = "Sasuke",
@@ -106,11 +92,7 @@ class NinjaRepositoryImpl : NinjaRepository {
                     "Water",
                     "Fire"
                 )
-            )
-        )
-    }
-    override val page2 by lazy {
-        listOf(
+            ),
             Ninja(
                 id = 4,
                 name = "Boruto",
@@ -185,11 +167,7 @@ class NinjaRepositoryImpl : NinjaRepository {
                     "Lightning",
                     "Wind"
                 )
-            )
-        )
-    }
-    override val page3 by lazy {
-        listOf(
+            ),
             Ninja(
                 id = 7,
                 name = "Kawaki",
@@ -260,11 +238,7 @@ class NinjaRepositoryImpl : NinjaRepository {
                     "Earth",
                     "Water"
                 )
-            )
-        )
-    }
-    override val page4 by lazy {
-        listOf(
+            ),
             Ninja(
                 id = 10,
                 name = "Isshiki",
@@ -336,11 +310,7 @@ class NinjaRepositoryImpl : NinjaRepository {
                     "Wind",
                     "Earth"
                 )
-            )
-        )
-    }
-    override val page5 by lazy {
-        listOf(
+            ),
             Ninja(
                 id = 13,
                 name = "Code",
@@ -406,33 +376,67 @@ class NinjaRepositoryImpl : NinjaRepository {
                 )
             )
         )
-    }
 
-    override suspend fun getNinjas(page: Int): ApiResponse {
+
+    override suspend fun getNinjas(page: Int, limit: Int): ApiResponse {
         return ApiResponse(
             success = true,
             message = "OK",
-            prevPage = calculatePage(page)[PREV_PAGE],
-            nextPage = calculatePage(page)[NEXT_PAGE],
-            ninjas = ninjas[page]!!,
-            lastUpdated = System.currentTimeMillis()
+            prevPage = calculatePage(
+                ninjas,
+                page,
+                limit
+            )[PREV_PAGE],
+            nextPage = calculatePage(
+                ninjas,
+                page,
+                limit
+            )[NEXT_PAGE],
+            ninjas = provideNinjas(
+                ninjas,
+                page = page,
+                limit = limit
+            ),
+            lastUpdated = System.currentTimeMillis(),
         )
     }
 
-    private fun calculatePage(page: Int): Map<String, Int?> {
-        var prevPage: Int? = page
-        var nextPage: Int? = page
+    private fun calculatePage(
+        ninjas : List<Ninja>,
+        page: Int,
+        limit: Int
+    ): Map<String, Int?> {
+        val ninjaPage = ninjas.windowed(
+            size = limit,
+            step = limit,
+            partialWindows = true
+        )
 
-        nextPage = if (page in 1..4) nextPage?.plus(1)
-        else null
+        require(page <= ninjaPage.size && page > 0)
 
-        prevPage = if (page in 2..5) prevPage?.minus(1)
-        else null
+        val prevPage = if (page == 1) null else page - 1
+        val nextPage = if (page == ninjaPage.size) null else page + 1
 
         return mapOf(
             PREV_PAGE to prevPage,
             NEXT_PAGE to nextPage
         )
+    }
+
+    private fun provideNinjas(
+        ninjas: List<Ninja>,
+        page: Int,
+        limit: Int
+    ): List<Ninja> {
+        val ninjaPage = ninjas.windowed(
+            size = limit,
+            step = limit,
+            partialWindows = true
+        )
+
+        require(page <= ninjaPage.size && page > 0)
+
+        return ninjaPage[page - 1]
     }
 
     override suspend fun searchNinjas(query: String?): ApiResponse {
@@ -447,14 +451,13 @@ class NinjaRepositoryImpl : NinjaRepository {
         if (query.isNullOrBlank()) return emptyList()
         val ninjaList = mutableListOf<Ninja>()
 
-        ninjas.forEach { (_, ninja) ->
-            ninja.forEach {
-                if (it.name.contains(query, true)) {
-                    ninjaList.add(it)
-                }
+        ninjas.forEach { ninja ->
+            if (ninja.name.contains(query, true)) {
+                ninjaList.add(ninja)
             }
         }
 
         return ninjaList
     }
+
 }

@@ -22,16 +22,20 @@ repositories {
     mavenCentral()
 }
 
+tasks.create("stage") {
+    dependsOn("installDist")
+}
+
 dependencies {
     implementation("io.ktor:ktor-server-core:$ktorVersion")
     implementation("io.ktor:ktor-server-host-common:$ktorVersion")
     implementation("io.ktor:ktor-serialization:$ktorVersion")
     implementation("io.ktor:ktor-server-netty:$ktorVersion")
     implementation("ch.qos.logback:logback-classic:$logbackVersion")
+
     implementation ("io.insert-koin:koin-ktor:$koinVersion")
     implementation ("io.insert-koin:koin-logger-slf4j:$koinVersion")
 
-    testImplementation ("io.insert-koin:koin-test-junit4:$koinVersion")
     testImplementation("io.ktor:ktor-server-tests:$ktorVersion")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlinVersion")
 }
